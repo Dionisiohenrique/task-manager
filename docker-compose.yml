@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: ./backend/TaskManager.Api
+      dockerfile: Dockerfile
+    container_name: taskmanager-api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/taskmanager.db
+    volumes:
+      - taskmanager-db-data:/app/data
+    ports:
+      - "5000:5000"
+    networks:
+      - taskmanager-network
+
+  frontend:
+    build:
+      context: ./frontend/task-manager-ui
+      dockerfile: Dockerfile
+    container_name: taskmanager-ui
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - taskmanager-network
+
+volumes:
+  taskmanager-db-data:
+    driver: local
+
+networks:
+  taskmanager-network:
+    driver: bridge
